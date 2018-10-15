@@ -274,7 +274,132 @@ timer.Create("Discord_GuildInfo", 10, 0, function()
 	DiscordRelay.GetGuild()
 end)
 
+
+
+
 -- To Discord
+hook.Add("ULibCommandCalled", "Discord_UlibCommandCalled", function(ply, cmd, args)
+	if not IsValid(ply) then return end
+	local argss = ""
+	for a,b in pairs(args) do argss = argss .. " " .. b end
+	
+	local nick = ply:GetName()
+	-- local sid = ply:SteamID()
+	-- local sid64 = util.SteamIDTo64(ply:SteamID())
+	-- http.Fetch("http://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
+		-- local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>")
+		
+		
+		-- for a,b in pairs(args) do argss = argss .. " " .. b end
+		
+		-- local msg = {
+			-- {
+				-- author = {
+					-- name = nick .. " ran command",
+					-- url = "https://steamcommunity.com/profiles/" .. sid64,
+					-- icon_url = avatar
+				-- },
+				-- footer = {
+					-- text = cmd .. argss
+					-- --text = sid .. " / " .. sid64,
+				-- },
+				-- color = DiscordRelay.HexColors.Green
+			-- }
+		-- }
+	
+		-- DiscordRelay.SendToDiscordRaw(nil, nil, msg)
+	-- end)
+	DiscordRelay.SendToDiscordRaw(nil, nil,  os.date("%H:%M:%S") .. ": **" .. nick .. "** ran command **".. cmd .. argss.."**")
+end)
+
+hook.Add("PlayerDeath", "Discord_Player_Death", function(ply, inflictor, attacker)
+	local death = "**" .. ply:Name() .. "**"
+	
+	if ( ply == attacker ) then
+		death = death .. " committed suicide"
+	else
+		death = death .. " was killed by **"			
+		
+		if attacker:IsPlayer() then
+			death = death .. attacker:GetName() 				
+		elseif attacker:IsVehicle() then
+			if IsValid(attacker:GetDriver()) then
+				death = death .. attacker:GetDriver():GetName()
+			else
+				death = death .. attacker:GetClass()
+			end
+		else
+			death = death .. attacker:GetClass()
+		end
+		
+		death = death .. "**"
+	end
+	
+	if IsValid(inflictor) and inflictor then
+		if inflictor:GetClass() == "player" or inflictor:GetClass() == "npc" then
+			if IsValid(inflictor:GetActiveWeapon()) then
+				death = death .. " using **"..inflictor:GetActiveWeapon():GetClass() .."**"
+			end
+		else
+			if inflictor ~= attacker then
+				death = death .. " using **"..inflictor:GetClass().."**"
+			elseif inflictor:IsVehicle() then
+				death = death .. " using **"..inflictor:GetClass().."**"
+			end
+		end	
+	end
+	
+	death = death .. "."
+	
+	DiscordRelay.SendToDiscordRaw(nil, nil, os.date("%H:%M:%S") .. ": "..death)
+
+	-- local nick = ply:GetName()
+	-- local sid = ply:SteamID()
+	-- local sid64 = util.SteamIDTo64(ply:SteamID())
+
+	-- http.Fetch("http://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
+		-- local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>")
+		-- local death = ""
+
+		
+		-- local msg = {
+			-- {
+				-- author = {
+					-- name = death,
+					-- url = "https://steamcommunity.com/profiles/" .. sid64,
+					-- icon_url = avatar
+				-- },
+				-- footer = {
+					-- text = sid .. " / " .. sid64,
+				-- },
+				-- color = DiscordRelay.HexColors.Green
+			-- }
+		-- }
+		-- --msg[1].description = "[:door: Join](steam://connect/"..game.GetIPAddress()..":27015)"
+		-- DiscordRelay.SendToDiscordRaw(nil, nil, msg)
+	-- end)
+end)
+
+cvars.OnConVarChanged= function( convar_name, value_old, value_new )
+	-- local msg = {
+		-- {
+			-- author = {
+				-- name = "Server cvar '".. convar_name .. "' changed to: ".. value_new
+				-- --url = "https://steamcommunity.com/profiles/" .. sid64,
+				-- --icon_url = avatar
+			-- },
+			-- footer = {
+				-- --text = sid .. " / " .. sid64,
+				-- text = "",
+			-- },
+			-- color = DiscordRelay.HexColors.Green
+		-- }
+	-- }
+	--DiscordRelay.SendToDiscordRaw(nil, nil, msg)
+	
+	DiscordRelay.SendToDiscordRaw(nil, nil,  "**" .. os.date("%H:%M:%S") .. "** Server cvar **".. convar_name .. "** changed to **".. value_new.."**")
+end 
+
 hook.Add("PlayerSay", "Discord_Webhook_Chat", function(ply, text, teamchat)
 	local nick = ply:Nick()
 	local sid = ply:SteamID()
@@ -322,7 +447,7 @@ hook.Add("player_connect", "Discord_Player_Connect", function(ply)
 				color = DiscordRelay.HexColors.Green
 			}
 		}
-		-- msg[1].description = "[:door: Join](https://re-dream.org/join)"
+		--msg[1].description = "[:door: Join](steam://connect/"..game.GetIPAddress()..":27015)"
 
 		DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 	end)
@@ -350,7 +475,7 @@ hook.Add("player_disconnect", "Discord_Player_Disconnect", function(data)
 				color = DiscordRelay.HexColors.Red
 			}
 		}
-		msg[1].description = msg[1].description -- .. "\n\n[:door: Join](https://re-dream.org/join)"
+		--msg[1].description = msg[1].description .. "\n\n[:door: Join](steam://connect/"..game.GetIPAddress()..":27015)"
 
 		DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 	end)
@@ -360,14 +485,14 @@ hook.Add("HTTPLoaded", "Discord_Announce_Active", function()
 		{
 			author = {
 				name = GetHostName(),
-				url = "https://re-dream.org/join",
+				url = "steam://connect/"..game.GetIPAddress()..":27015",
 				icon_url = "https://re-dream.org/media/redream-logo.png"
 			},
 			description = "is now online, playing `" .. game.GetMap() .. "`.",
 			color = DiscordRelay.HexColors.Teal
 		}
 	}
-	msg[1].description = msg[1].description -- .. "\n\n[:door: Join](https://re-dream.org/join)"
+	msg[1].description = msg[1].description .. "\n\n[:door: Join](steam://connect/"..game.GetIPAddress()..":27015)"
 
 	DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 	hook.Remove("HTTPLoaded", "Discord_Announce_Active") -- Just in case

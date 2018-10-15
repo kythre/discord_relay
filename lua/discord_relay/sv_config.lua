@@ -36,8 +36,9 @@ DiscordRelay.BotToken = token
 
 -- Set this to your Channel ID. You can get this number in Discord by typing \#channelnamehere into chat.
 -- Remove the <# at the start and the > at the end, so you are left with only a long number.
-DiscordRelay.DiscordGuildID = "172686511085584384"
-DiscordRelay.DiscordChannelID = "290488910608465930"
+DiscordRelay.DiscordGuildID = "124237184550043654"
+DiscordRelay.DiscordChannelID = "501198430031577090"
+
 
 /*----------------------------------------
 Non Critical Config Options Below
@@ -55,5 +56,5 @@ DiscordRelay.AvoidUsingBots = true
 
 -- DEBUG MODE! Do not enable this unless you've been told to. It can get spammy in the console if you enable this.
 -- As it stands, this only serves the purpose of identifying problems not identified by discord's json responses.
-DiscordRelay.DEBUG_MODE = false
+DiscordRelay.DEBUG_MODE = true
 
