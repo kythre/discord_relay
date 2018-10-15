@@ -278,37 +278,29 @@ end)
 
 
 -- To Discord
+-- local OldConCommand = concommand.Run
+-- function concommand.Run( Player, cmd, args )
+	-- if SERVER and Player and Player:IsValid() and Player:IsPlayer() then
+		-- if cmd then			
+			-- local argss = ""
+			
+			-- if args then
+				-- for a,b in pairs(args) do argss = argss .. " " .. b end
+			-- end
+			
+			-- local nick = Player:GetName()
+			-- DiscordRelay.SendToDiscordRaw(nil, nil,  os.date("%H:%M:%S") .. ": **" .. nick .. "** ran command **".. cmd .. argss .."**")
+		-- end
+	-- end
+	
+	-- return OldConCommand( Player, cmd, args )
+-- end
+
 hook.Add("ULibCommandCalled", "Discord_UlibCommandCalled", function(ply, cmd, args)
 	if not IsValid(ply) then return end
 	local argss = ""
 	for a,b in pairs(args) do argss = argss .. " " .. b end
-	
 	local nick = ply:GetName()
-	-- local sid = ply:SteamID()
-	-- local sid64 = util.SteamIDTo64(ply:SteamID())
-	-- http.Fetch("http://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
-		-- local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>")
-		
-		
-		-- for a,b in pairs(args) do argss = argss .. " " .. b end
-		
-		-- local msg = {
-			-- {
-				-- author = {
-					-- name = nick .. " ran command",
-					-- url = "https://steamcommunity.com/profiles/" .. sid64,
-					-- icon_url = avatar
-				-- },
-				-- footer = {
-					-- text = cmd .. argss
-					-- --text = sid .. " / " .. sid64,
-				-- },
-				-- color = DiscordRelay.HexColors.Green
-			-- }
-		-- }
-	
-		-- DiscordRelay.SendToDiscordRaw(nil, nil, msg)
-	-- end)
 	DiscordRelay.SendToDiscordRaw(nil, nil,  os.date("%H:%M:%S") .. ": **" .. nick .. "** ran command **".. cmd .. argss.."**")
 end)
 
@@ -397,7 +389,7 @@ cvars.OnConVarChanged= function( convar_name, value_old, value_new )
 	-- }
 	--DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 	
-	DiscordRelay.SendToDiscordRaw(nil, nil,  "**" .. os.date("%H:%M:%S") .. "** Server cvar **".. convar_name .. "** changed to **".. value_new.."**")
+	DiscordRelay.SendToDiscordRaw(nil, nil,   os.date("%H:%M:%S") .. " Server cvar **".. convar_name .. "** changed to **".. value_new.."**")
 end 
 
 hook.Add("PlayerSay", "Discord_Webhook_Chat", function(ply, text, teamchat)
