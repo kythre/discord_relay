@@ -289,48 +289,47 @@ hook.Add("ULibCommandCalled", "Discord_UlibCommandCalled", function(ply, cmd, ar
 	DiscordRelay.SendToDiscordRaw(nil, nil,  os.date("%H:%M:%S") .. ": **" .. nick .. "** ran command **".. cmd .. argss.."**")
 end)
 
-hook.Add("PlayerDeath", "Discord_Player_Death", function(ply, inflictor, attacker)
-	local death = ""
+hook.Add("PlayerDeath", "Discord_Player_Death", function(victim, inflictor, attacker)
+	local deathmessage = ""
+	local messagedaddy
+
+	if attacker:IsVehicle() and IsValid(attacker:GetDriver()) then
+		attacker = attacker:GetDriver()
+	end
 	
-	if ( ply == attacker ) then
-		death = death .. "committed suicide"
-	else
-		death = death .. "killed by **"			
+	if attacker:IsPlayer() then
+		messagedaddy = attacker
 		
-		if attacker:IsPlayer() then
-			death = death .. attacker:GetName() 				
-		elseif attacker:IsVehicle() then
-			if IsValid(attacker:GetDriver()) then
-				death = death .. attacker:GetDriver():GetName()
-			else
-				death = death .. attacker:GetClass()
-			end
+		if (victim == attacker) then
+			deathmessage = deathmessage .. "committed **suicide**"
 		else
-			death = death .. attacker:GetClass()
+			deathmessage = deathmessage .. "killed **"..victim:Nick().."**"
 		end
+			
+		if IsValid(inflictor) then
+			if inflictor:IsPlayer() or inflictor:IsNPC() then
+				if IsValid(inflictor:GetActiveWeapon()) then
+					deathmessage = deathmessage  .. " using **" .. inflictor:GetActiveWeapon():GetClass().. "**"
+				end
+			else
+				deathmessage = deathmessage  .. " using **" .. inflictor:GetClass().. "**"
+			end
+		end				
+	else
+		messagedaddy = victim
 		
-		death = death .. "**"
-	end
-	
-	if IsValid(inflictor) and inflictor then
-		if inflictor:GetClass() == "player" or inflictor:GetClass() == "npc" then
-			if IsValid(inflictor:GetActiveWeapon()) then
-				death = death .. " using **"..inflictor:GetActiveWeapon():GetClass() .."**"
-			end
+		if attacker:IsVehicle() and IsValid(attacker:GetDriver()) then
+			deathmessage = deathmessage .. "was killed by **" .. attacker:GetDriver():Nick() .. "**"
+
 		else
-			if inflictor ~= attacker then
-				death = death .. " using **"..inflictor:GetClass().."**"
-			elseif inflictor:IsVehicle() then
-				death = death .. " using **"..inflictor:GetClass().."**"
-			end
-		end	
+			deathmessage = deathmessage .. "was killed by **" .. attacker:GetClass() .. "**"
+		end
 	end
 	
-	death = death .. "."
-	
-	local nick = IsValid(ply) and (ply.RealName and ply:RealName() or ply:Nick()) or data.name
-	local sid = ply.SteamID and ply:SteamID() or data.networkid
-	local sid64 = ply.SteamID64 and ply:SteamID64() or util.SteamIDTo64(data.networkid)
+	local ply = messagedaddy
+	local nick = IsValid(ply) and (ply.RealName and ply:RealName() or ply:Nick())
+	local sid = ply.SteamID and ply:SteamID()
+	local sid64 = ply.SteamID64 and ply:SteamID64()
 	
 	http.Fetch("http://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
 		local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>")
@@ -341,14 +340,14 @@ hook.Add("PlayerDeath", "Discord_Player_Death", function(ply, inflictor, attacke
 					url = "https://steamcommunity.com/profiles/" .. sid64,
 					icon_url = avatar
 				},
-				description = death,
+				description = deathmessage,
 				footer = {
 					text = sid .. " / " .. sid64
 				},
 				color = DiscordRelay.HexColors.Purple
 			}
 		}
-		msg[1].description = msg[1].description -- .. "\n\n[:door: Join](steam://connect/159.89.37.52:27015)"
+		--msg[1].description = msg[1].description .. "\n\n[:door: Join]("..DiscordRelay.ServerJoinURL..")"
 
 		DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 	end)
@@ -426,7 +425,7 @@ hook.Add("player_connect", "Discord_Player_Connect", function(ply)
 				color = DiscordRelay.HexColors.Green
 			}
 		}
-		-- msg[1].description = "[:door: Join](steam://connect/159.89.37.52:27015)"
+		--msg[1].description = msg[1].description .. "\n\n[:door: Join]("..DiscordRelay.ServerJoinURL..")"
 
 		DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 	end)
@@ -455,7 +454,7 @@ hook.Add("player_disconnect", "Discord_Player_Disconnect", function(data)
 				color = DiscordRelay.HexColors.Red
 			}
 		}
-		msg[1].description = msg[1].description -- .. "\n\n[:door: Join](steam://connect/159.89.37.52:27015)"
+		--msg[1].description = msg[1].description .. "\n\n[:door: Join]("..DiscordRelay.ServerJoinURL..")"
 
 		DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 	end)
@@ -473,7 +472,7 @@ hook.Add("HTTPLoaded", "Discord_Announce_Active", function()
 			color = DiscordRelay.HexColors.Teal
 		}
 	}
-	msg[1].description = msg[1].description -- .. "\n\n[:door: Join](steam://connect/159.89.37.52:27015)"
+	--msg[1].description = msg[1].description .. "\n\n[:door: Join]("..DiscordRelay.ServerJoinURL..")"
 
 	DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 	hook.Remove("HTTPLoaded", "Discord_Announce_Active") -- Just in case
@@ -495,4 +494,3 @@ hook.Add("InitPostEntity", "CreateAFuckingBot", function()
 
 	hook.Remove("InitPostEntity", "CreateAFuckingBot")
 end)
-

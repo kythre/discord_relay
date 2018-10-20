@@ -1,7 +1,7 @@
 -- Config
 DiscordRelay = DiscordRelay or {}
 DiscordRelay.ServerIconURL = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/30/30de77ab3a398f26ad0e237da778ee8d22022cd0_full.jpg"
-DiscordRelay.ServerJoinURL = ""
+DiscordRelay.ServerJoinURL = "" --steam://connect/159.89.37.52/:27015
 DiscordRelay.CmdPrefix = "^[%$%.!/]"
 DiscordRelay.AdminRoles = { -- TODO: Use permission system instead
 	["491349829419663371"] = true, -- a

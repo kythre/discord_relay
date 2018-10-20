@@ -1,0 +1,7 @@
+"AddonInfo"
+{
+	"name" "discord_relay"
+	"author_name" "author"
+	"info" ""
+"
+}
