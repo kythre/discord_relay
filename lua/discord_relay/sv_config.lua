@@ -51,6 +51,7 @@ DiscordRelay.MaxMessages = 10
 
 -- Should we avoid using a bot? You may need to add "sv_hibernate_think 1" to your server.cfg file.
 -- If your server isn't announcing online status or you keep saeing "HTTP failed - ISteamHTTP isn't available" in your console, set this to false.
+DiscordRelay.AvoidUsingBots = false
 
 -- DEBUG MODE! Do not enable this unless you've been told to. It can get spammy in the console if you enable this.
 -- As it stands, this only serves the purpose of identifying problems not identified by discord's json responses.
