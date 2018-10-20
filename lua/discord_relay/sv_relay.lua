@@ -290,7 +290,6 @@ hook.Add("ULibCommandCalled", "Discord_UlibCommandCalled", function(ply, cmd, ar
 end)
 
 hook.Add("PlayerDeath", "Discord_Player_Death", function(ply, inflictor, attacker)
-
 	local death = ""
 	
 	if ( ply == attacker ) then
@@ -467,8 +466,8 @@ hook.Add("HTTPLoaded", "Discord_Announce_Active", function()
 		{
 			author = {
 				name = GetHostName(),
-				url = "steam://connect/159.89.37.52:27015",
-				icon_url = "http://www.famfamfam.com/lab/icons/silk/icons/control_play.png"
+				url = DiscordRelay.ServerJoinURL,
+				icon_url = DiscordRelay.ServerIconURL
 			},
 			description = "is now online, playing `" .. game.GetMap() .. "`.",
 			color = DiscordRelay.HexColors.Teal

@@ -1,8 +1,3 @@
-DiscordRelay.CmdPrefix = "^[%$%.!/]"
-DiscordRelay.AdminRoles = { -- TODO: Use permission system instead
-	["491349829419663371"] = true, -- a
-}
-
 function cmd(cmd)	
 	game.ConsoleCommand(cmd .. "\n")	
 end
@@ -59,6 +54,7 @@ local function doEval(func)
 	end
 	DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 end
+
 DiscordRelay.Commands = {
 	status = function(msg)
 		local time = CurTime()
@@ -76,8 +72,8 @@ DiscordRelay.Commands = {
 			{
 				author = {
 					name = GetHostName(),
-					url = "https://re-dream.org/join",
-					icon_url = "https://re-dream.org/media/redream-logo.png"
+					url = DiscordRelay.ServerJoinURL,
+					icon_url = DiscordRelay.ServerIconURL
 				},
 				description = uptime .. " - :map: **Map**: `" .. game.GetMap() .. "`",
 				fields = {

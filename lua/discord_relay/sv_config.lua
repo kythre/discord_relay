@@ -1,6 +1,11 @@
-
 -- Config
 DiscordRelay = DiscordRelay or {}
+DiscordRelay.ServerIconURL = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/30/30de77ab3a398f26ad0e237da778ee8d22022cd0_full.jpg"
+DiscordRelay.ServerJoinURL = ""
+DiscordRelay.CmdPrefix = "^[%$%.!/]"
+DiscordRelay.AdminRoles = { -- TODO: Use permission system instead
+	["491349829419663371"] = true, -- a
+}
 
 local webhook
 if not file.Exists("cfg/relay_webhook.cfg", "GAME") or file.Read("cfg/relay_webhook.cfg", "GAME") == nil then
@@ -56,4 +61,3 @@ DiscordRelay.AvoidUsingBots = false
 -- DEBUG MODE! Do not enable this unless you've been told to. It can get spammy in the console if you enable this.
 -- As it stands, this only serves the purpose of identifying problems not identified by discord's json responses.
 DiscordRelay.DEBUG_MODE = false
-
