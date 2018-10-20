@@ -3,6 +3,10 @@ DiscordRelay.AdminRoles = { -- TODO: Use permission system instead
 	["491349829419663371"] = true, -- a
 }
 
+function cmd(cmd)	
+	game.ConsoleCommand(cmd .. "\n")	
+end
+
 function DiscordRelay.IsMemberAdmin(member)
 	for roleId, _ in next, DiscordRelay.AdminRoles do
 		if DiscordRelay.MemberHasRoleID(member, roleId) then
