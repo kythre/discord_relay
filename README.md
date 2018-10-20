@@ -1,1 +1,1 @@
-# dont use this lol
+# custom edition for my server
