@@ -37,8 +37,7 @@ DiscordRelay.BotToken = token
 -- Set this to your Channel ID. You can get this number in Discord by typing \#channelnamehere into chat.
 -- Remove the <# at the start and the > at the end, so you are left with only a long number.
 DiscordRelay.DiscordGuildID = "124237184550043654"
-DiscordRelay.DiscordChannelID = "501198430031577090"
-
+DiscordRelay.DiscordChannelID = "500897096514142225"
 
 /*----------------------------------------
 Non Critical Config Options Below
@@ -52,9 +51,8 @@ DiscordRelay.MaxMessages = 10
 
 -- Should we avoid using a bot? You may need to add "sv_hibernate_think 1" to your server.cfg file.
 -- If your server isn't announcing online status or you keep saeing "HTTP failed - ISteamHTTP isn't available" in your console, set this to false.
-DiscordRelay.AvoidUsingBots = true
 
 -- DEBUG MODE! Do not enable this unless you've been told to. It can get spammy in the console if you enable this.
 -- As it stands, this only serves the purpose of identifying problems not identified by discord's json responses.
-DiscordRelay.DEBUG_MODE = true
+DiscordRelay.DEBUG_MODE = false
 

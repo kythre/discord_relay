@@ -1,10 +1,8 @@
-
 if not DiscordRelay then
 	Error("Woah, we couldn't find ourselves a config file! If this happens, you should reinstall.")
 end
 
 DiscordRelay.NextRunTime = DiscordRelay.NextRunTime or SysTime()
-
 DiscordRelay.FileLocations = DiscordRelay.FileLocations or {}
 DiscordRelay.FileLocations.ReceivedMessages = "discord_relay/received_messages.txt"
 DiscordRelay.Self = DiscordRelay.Self or nil
@@ -12,6 +10,7 @@ DiscordRelay.Self = DiscordRelay.Self or nil
 if not file.IsDir("discord_relay/", "DATA") then
 	file.CreateDir("discord_relay")
 end
+
 for k, v in pairs(DiscordRelay.FileLocations) do
 	if not file.Exists(v, "DATA") then
 		file.Write(v, util.TableToJSON({}))
@@ -28,6 +27,7 @@ local function checkHTTP()
 		http.Loaded = true
 	end)
 end
+
 if not http.Loaded then
 	timer.Create("HTTPLoadedCheck", 3, 0, function()
 		local ok, err = pcall(function()
@@ -44,6 +44,7 @@ if not http.Loaded then
 		end
 	end)
 end
+
 -- Thanks Author. for this bypass. Need to know when HTTP loads so we can gather some info about the bot and shit
 hook.Add("HTTPLoaded", "GetSelf", function()
 	HTTP({
@@ -61,6 +62,7 @@ local errcodes = {
 	[50001] = "Your bot cannot read the channel! Please ensure the bot has 'Read Messages' permission for the channel.",
 	[50010] = "Your bot hasn't got an account! Please go back and make one!"
 }
+
 function DiscordRelay.VerifyMessageSuccess(code, body, headers)
 	body = util.JSONToTable(body)
 
@@ -93,6 +95,7 @@ DiscordRelay.HexColors = {
 	Purple = 0xA369C7,
 	Teal = 0x32C79A
 }
+
 function DiscordRelay.SendToDiscordRaw(username, avatar, message)
 	local t_post = {
 		username = username,
@@ -128,7 +131,6 @@ include("discord_relay/sv_api.lua")
 include("discord_relay/sv_commands.lua")
 
 -- From Discord
-
 util.AddNetworkString("DiscordRelay_MessageReceived")
 
 function DiscordRelay.HandleChat(code, body, headers)
@@ -238,6 +240,7 @@ function DiscordRelay.HandleChat(code, body, headers)
 		end
 	end
 end
+
 function DiscordRelay.GetMessages()
 	if SysTime() < DiscordRelay.NextRunTime then return end
 
@@ -263,54 +266,37 @@ function DiscordRelay.GetMessages()
 
 	HTTP(t_struct)
 end
+
 hook.Add("Think", "Discord_Check_Messages", function()
 	if SysTime() >= DiscordRelay.NextRunTime then
 		DiscordRelay.GetMessages()
 		DiscordRelay.NextRunTime = SysTime() + DiscordRelay.MessageDelay
 	end
 end)
+
 timer.Create("Discord_GuildInfo", 10, 0, function()
 	DiscordRelay.GetMembers()
 	DiscordRelay.GetGuild()
 end)
 
-
-
-
 -- To Discord
--- local OldConCommand = concommand.Run
--- function concommand.Run( Player, cmd, args )
-	-- if SERVER and Player and Player:IsValid() and Player:IsPlayer() then
-		-- if cmd then			
-			-- local argss = ""
-			
-			-- if args then
-				-- for a,b in pairs(args) do argss = argss .. " " .. b end
-			-- end
-			
-			-- local nick = Player:GetName()
-			-- DiscordRelay.SendToDiscordRaw(nil, nil,  os.date("%H:%M:%S") .. ": **" .. nick .. "** ran command **".. cmd .. argss .."**")
-		-- end
-	-- end
-	
-	-- return OldConCommand( Player, cmd, args )
--- end
-
 hook.Add("ULibCommandCalled", "Discord_UlibCommandCalled", function(ply, cmd, args)
 	if not IsValid(ply) then return end
 	local argss = ""
 	for a,b in pairs(args) do argss = argss .. " " .. b end
 	local nick = ply:GetName()
+	if ply:IsAdmin() then return end
 	DiscordRelay.SendToDiscordRaw(nil, nil,  os.date("%H:%M:%S") .. ": **" .. nick .. "** ran command **".. cmd .. argss.."**")
 end)
 
 hook.Add("PlayerDeath", "Discord_Player_Death", function(ply, inflictor, attacker)
-	local death = "**" .. ply:Name() .. "**"
+
+	local death = ""
 	
 	if ( ply == attacker ) then
-		death = death .. " committed suicide"
+		death = death .. "committed suicide"
 	else
-		death = death .. " was killed by **"			
+		death = death .. "killed by **"			
 		
 		if attacker:IsPlayer() then
 			death = death .. attacker:GetName() 				
@@ -343,35 +329,34 @@ hook.Add("PlayerDeath", "Discord_Player_Death", function(ply, inflictor, attacke
 	
 	death = death .. "."
 	
-	DiscordRelay.SendToDiscordRaw(nil, nil, os.date("%H:%M:%S") .. ": "..death)
+	local nick = IsValid(ply) and (ply.RealName and ply:RealName() or ply:Nick()) or data.name
+	local sid = ply.SteamID and ply:SteamID() or data.networkid
+	local sid64 = ply.SteamID64 and ply:SteamID64() or util.SteamIDTo64(data.networkid)
+	
+	http.Fetch("http://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
+		local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>")
+		local msg = {
+			{
+				author = {
+					name = nick,
+					url = "https://steamcommunity.com/profiles/" .. sid64,
+					icon_url = avatar
+				},
+				description = death,
+				footer = {
+					text = sid .. " / " .. sid64
+				},
+				color = DiscordRelay.HexColors.Purple
+			}
+		}
+		msg[1].description = msg[1].description -- .. "\n\n[:door: Join](steam://connect/159.89.37.52:27015)"
 
-	-- local nick = ply:GetName()
-	-- local sid = ply:SteamID()
-	-- local sid64 = util.SteamIDTo64(ply:SteamID())
-
-	-- http.Fetch("http://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
-		-- local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>")
-		-- local death = ""
-
-		
-		-- local msg = {
-			-- {
-				-- author = {
-					-- name = death,
-					-- url = "https://steamcommunity.com/profiles/" .. sid64,
-					-- icon_url = avatar
-				-- },
-				-- footer = {
-					-- text = sid .. " / " .. sid64,
-				-- },
-				-- color = DiscordRelay.HexColors.Green
-			-- }
-		-- }
-		-- --msg[1].description = "[:door: Join](steam://connect/"..game.GetIPAddress()..":27015)"
-		-- DiscordRelay.SendToDiscordRaw(nil, nil, msg)
-	-- end)
+		DiscordRelay.SendToDiscordRaw(nil, nil, msg)
+	end)
 end)
 
+--[[
+local OldConCommand = concommand.Run
 cvars.OnConVarChanged= function( convar_name, value_old, value_new )
 	-- local msg = {
 		-- {
@@ -390,7 +375,9 @@ cvars.OnConVarChanged= function( convar_name, value_old, value_new )
 	--DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 	
 	DiscordRelay.SendToDiscordRaw(nil, nil,   os.date("%H:%M:%S") .. " Server cvar **".. convar_name .. "** changed to **".. value_new.."**")
+	return OldConCommand( Player, cmd, args )
 end 
+]]
 
 hook.Add("PlayerSay", "Discord_Webhook_Chat", function(ply, text, teamchat)
 	local nick = ply:Nick()
@@ -418,6 +405,7 @@ hook.Add("PlayerSay", "Discord_Webhook_Chat", function(ply, text, teamchat)
 		DiscordRelay.SendToDiscordRaw(nick, avatar, text)
 	end)
 end)
+
 gameevent.Listen("player_connect")
 hook.Add("player_connect", "Discord_Player_Connect", function(ply)
 	local nick = ply.name
@@ -439,11 +427,12 @@ hook.Add("player_connect", "Discord_Player_Connect", function(ply)
 				color = DiscordRelay.HexColors.Green
 			}
 		}
-		--msg[1].description = "[:door: Join](steam://connect/"..game.GetIPAddress()..":27015)"
+		-- msg[1].description = "[:door: Join](steam://connect/159.89.37.52:27015)"
 
 		DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 	end)
 end)
+
 gameevent.Listen("player_disconnect")
 hook.Add("player_disconnect", "Discord_Player_Disconnect", function(data)
 	local ply = Player(data.userid)
@@ -467,24 +456,25 @@ hook.Add("player_disconnect", "Discord_Player_Disconnect", function(data)
 				color = DiscordRelay.HexColors.Red
 			}
 		}
-		--msg[1].description = msg[1].description .. "\n\n[:door: Join](steam://connect/"..game.GetIPAddress()..":27015)"
+		msg[1].description = msg[1].description -- .. "\n\n[:door: Join](steam://connect/159.89.37.52:27015)"
 
 		DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 	end)
 end)
+
 hook.Add("HTTPLoaded", "Discord_Announce_Active", function()
 	local msg = {
 		{
 			author = {
 				name = GetHostName(),
-				url = "steam://connect/"..game.GetIPAddress()..":27015",
-				icon_url = "https://re-dream.org/media/redream-logo.png"
+				url = "steam://connect/159.89.37.52:27015",
+				icon_url = "http://www.famfamfam.com/lab/icons/silk/icons/control_play.png"
 			},
 			description = "is now online, playing `" .. game.GetMap() .. "`.",
 			color = DiscordRelay.HexColors.Teal
 		}
 	}
-	msg[1].description = msg[1].description .. "\n\n[:door: Join](steam://connect/"..game.GetIPAddress()..":27015)"
+	msg[1].description = msg[1].description -- .. "\n\n[:door: Join](steam://connect/159.89.37.52:27015)"
 
 	DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 	hook.Remove("HTTPLoaded", "Discord_Announce_Active") -- Just in case
