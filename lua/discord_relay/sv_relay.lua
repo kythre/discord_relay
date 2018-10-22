@@ -280,15 +280,6 @@ timer.Create("Discord_GuildInfo", 10, 0, function()
 end)
 
 -- To Discord
-hook.Add("ULibCommandCalled", "Discord_UlibCommandCalled", function(ply, cmd, args)
-	if not IsValid(ply) then return end
-	local argss = ""
-	for a,b in pairs(args) do argss = argss .. " " .. b end
-	local nick = ply:GetName()
-	if ply:IsAdmin() then return end
-	DiscordRelay.SendToDiscordRaw(nil, nil,  os.date("%H:%M:%S") .. ": **" .. nick .. "** ran command **".. cmd .. argss.."**")
-end)
-
 hook.Add("PlayerDeath", "Discord_Player_Death", function(victim, inflictor, attacker)
 	local deathmessage = ""
 	local messagedaddy
@@ -477,6 +468,92 @@ hook.Add("HTTPLoaded", "Discord_Announce_Active", function()
 	DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 	hook.Remove("HTTPLoaded", "Discord_Announce_Active") -- Just in case
 end)
+
+
+--[[
+local function overrideulxlogstring()
+	oldlogstring = oldlogstring or ulx.logString
+
+	function ulx.logString( str, log_to_main )
+		local date = os.date( "*t" )
+		DiscordRelay.SendToDiscordRaw(nil, nil,  string.format( "[%02i:%02i:%02i] ", date.hour, date.min, date.sec ) .. str )
+		oldlogstring( str, log_to_main )
+	end
+end
+if ulx then overrideulxlogstring() end
+hook.Add("InitPostEntity", "OverrideULXlogsting", overrideulxlogstring)
+]]
+
+
+local function overridefancyLogAdmin()
+	oldfancyLogAdmin = oldfancyLogAdmin or ulx.fancyLogAdmin
+
+	function ulx.fancyLogAdmin(calling_ply, format, ...)
+		local arg_pos = 1
+		local args = { ... }
+		local message = ""
+		local no_targets = false
+		local hide_echo = false
+		
+		if type( format ) == "boolean" then
+			hide_echo = format
+			format = args[ 1 ]
+			arg_pos = arg_pos + 1
+		end
+		
+		if type( format ) == "table" then
+			players = format
+			format = args[ 1 ]
+			arg_pos = arg_pos + 1
+		end
+		
+		format:gsub( "([^#]*)#([%.%d]*[%a])([^#]*)", function( prefix, tag, postfix )
+			local specifier = tag:sub( -1, -1 )
+			local arg = args[ arg_pos ]
+			arg_pos = arg_pos + 1
+			
+			message = message .. prefix
+			
+			if specifier == "A" then
+				message = message .. calling_ply:Nick()
+				arg_pos = arg_pos - 1
+			end
+			
+			if specifier == "i" or specifier == "s" then
+				message = message .. arg
+			end
+			
+			if specifier == "T" then
+				if #arg == 0 then no_targets = true end
+				
+				if type( arg ) == "table" then 
+					for j,k in pairs(arg) do 
+							if j > 1 then 
+							message = message .. ", "
+						end
+						message = message .. k:Nick()
+					end
+				else
+					message = message .. arg:Nick()
+				end
+			end 
+			
+			message = message .. postfix
+		end)
+		
+		if no_targets then -- We don't want to log if there's nothing being targetted
+			return
+		end
+		
+		local date = os.date( "*t" )
+		DiscordRelay.SendToDiscordRaw(nil, nil,  string.format( "[%02i:%02i:%02i] ", date.hour, date.min, date.sec ) .. message )
+
+		oldfancyLogAdmin(calling_ply, format, ...)
+	end
+end
+if ulx then overridefancyLogAdmin() end
+hook.Add("InitPostEntity", "OverrideULXfancyLogAdmin", overridefancyLogAdmin)
+
 
 -- Initialize
 hook.Add("InitPostEntity", "CreateAFuckingBot", function()
