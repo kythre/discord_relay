@@ -510,23 +510,31 @@ local function overridefancyLogAdmin()
 		format:gsub( "([^#]*)#([%.%d]*[%a])([^#]*)", function( prefix, tag, postfix )
 			local specifier = tag:sub( -1, -1 )
 			local arg = args[ arg_pos ]
-			arg_pos = arg_pos + 1
+			arg_pos = arg_pos + 1	
 			
 			message = message .. prefix
 			
 			if specifier == "A" then
-				message = message .. calling_ply:Nick()
+				if calling_ply:IsPlayer() then 
+					message = message .. calling_ply:Nick()
+				else
+					message = message .. "(Console)"
+				end
+				
 				arg_pos = arg_pos - 1
 			end
 			
-			if specifier == "i" or specifier == "s" then
+			if specifier == "i" then
 				message = message .. arg
 			end
 			
-			if specifier == "T" then
+			if specifier == "s" or specifier == "q" then
+				message = message .. "\"" .. arg .. "\""
+			end
+			
+			if specifier == "T" then				
+				if type( arg ) == "table" then
 				if #arg == 0 then no_targets = true end
-				
-				if type( arg ) == "table" then 
 					for j,k in pairs(arg) do 
 							if j > 1 then 
 							message = message .. ", "
@@ -553,7 +561,6 @@ local function overridefancyLogAdmin()
 end
 if ulx then overridefancyLogAdmin() end
 hook.Add("InitPostEntity", "OverrideULXfancyLogAdmin", overridefancyLogAdmin)
-
 
 -- Initialize
 hook.Add("InitPostEntity", "CreateAFuckingBot", function()
