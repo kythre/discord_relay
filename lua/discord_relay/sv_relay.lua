@@ -368,6 +368,58 @@ cvars.OnConVarChanged= function( convar_name, value_old, value_new )
 end 
 ]]
 
+hook.Add( "LagDetectorDetected", "Discord_agDetectorDetected", function()
+        local msg = {
+                {
+                        author = {
+                                name = GetHostName(),
+                                url = DiscordRelay.ServerJoinURL,
+                                icon_url = DiscordRelay.ServerIconURL
+                        },
+                        description = "Lag detected.",
+                        color = DiscordRelay.HexColors.Teal
+                }
+        }
+        --msg[1].description = msg[1].description .. "\n\n[:door: Join]("..DiscordRelay.ServerJoinURL..")"
+
+        DiscordRelay.SendToDiscordRaw(nil, nil, msg)
+end)
+
+hook.Add( "LagDetectorQuiet", "Discord_LagDetectorQuiet", function()
+        local msg = {
+                {
+                        author = {
+                                name = GetHostName(),
+                                url = DiscordRelay.ServerJoinURL,
+                                icon_url = DiscordRelay.ServerIconURL
+                        },
+                        description = "Lag Subsided.",
+                        color = DiscordRelay.HexColors.Teal
+                }
+        }
+        --msg[1].description = msg[1].description .. "\n\n[:door: Join]("..DiscordRelay.ServerJoinURL..")"
+
+        DiscordRelay.SendToDiscordRaw(nil, nil, msg)
+end)
+
+hook.Add( "LagDetectorMeltdown", "MyLagDetectorMeltdown", function()
+        local msg = {
+                {
+                        author = {
+                                name = GetHostName(),
+                                url = DiscordRelay.ServerJoinURL,
+                                icon_url = DiscordRelay.ServerIconURL
+                        },
+                        description = "Server meltdown.",
+                        color = DiscordRelay.HexColors.Teal
+                }
+        }
+        --msg[1].description = msg[1].description .. "\n\n[:door: Join]("..DiscordRelay.ServerJoinURL..")"
+
+        DiscordRelay.SendToDiscordRaw(nil, nil, msg)
+end)
+
+
 hook.Add("PlayerSay", "Discord_Webhook_Chat", function(ply, text, teamchat)
 	local nick = ply:Nick()
 	local sid = ply:SteamID()
@@ -394,6 +446,32 @@ hook.Add("PlayerSay", "Discord_Webhook_Chat", function(ply, text, teamchat)
 		DiscordRelay.SendToDiscordRaw(nick, avatar, text)
 	end)
 end)
+
+hook.Add("PlayerInitialSpawn", "Discord_PlayerInitilaSpawn", function (ply) 
+	local nick = ply.name
+        local sid = ply.networkid
+        local sid64 = util.SteamIDTo64(ply.networkid)
+
+        http.Fetch("http://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
+                local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>")
+                local msg = {
+                        {
+                                author = {
+                                        name = nick .. " is has spanwd in the server!",
+                                        url = "https://steamcommunity.com/profiles/" .. sid64,
+                                        icon_url = avatar
+                                },
+                                footer = {
+                                        text = sid .. " / " .. sid64,
+                                },
+                                color = DiscordRelay.HexColors.Green
+                        }
+                }
+                --msg[1].description = msg[1].description .. "\n\n[:door: Join]("..DiscordRelay.ServerJoinURL$
+
+                DiscordRelay.SendToDiscordRaw(nil, nil, msg)
+        end)
+end )
 
 gameevent.Listen("player_connect")
 hook.Add("player_connect", "Discord_Player_Connect", function(ply)
