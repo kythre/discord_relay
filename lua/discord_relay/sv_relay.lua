@@ -567,6 +567,8 @@ local function overridefancyLogAdmin()
 	oldfancyLogAdmin = oldfancyLogAdmin or ulx.fancyLogAdmin
 
 	function ulx.fancyLogAdmin(calling_ply, format, ...)
+   		oldfancyLogAdmin(calling_ply, format, ...)
+
 		local arg_pos = 1
 		local args = { ... }
 		local message = ""
@@ -633,8 +635,6 @@ local function overridefancyLogAdmin()
 		
 		local date = os.date( "*t" )
 		DiscordRelay.SendToDiscordRaw(nil, nil,  string.format( "[%02i:%02i:%02i] ", date.hour, date.min, date.sec ) .. message )
-
-		oldfancyLogAdmin(calling_ply, format, ...)
 	end
 end
 if ulx then overridefancyLogAdmin() end
