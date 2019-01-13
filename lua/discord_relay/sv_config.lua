@@ -4,7 +4,7 @@ DiscordRelay.ServerIconURL = "https://steamcdn-a.akamaihd.net/steamcommunity/pub
 DiscordRelay.ServerJoinURL = "" --steam://connect/159.89.37.52/:27015
 DiscordRelay.CmdPrefix = "^[%$%.!/]"
 DiscordRelay.AdminRoles = { -- TODO: Use permission system instead
-	["491349829419663371"] = true, -- a
+	["531661605281202186"] = true, -- a
 }
 
 local webhook
@@ -41,8 +41,8 @@ DiscordRelay.BotToken = token
 
 -- Set this to your Channel ID. You can get this number in Discord by typing \#channelnamehere into chat.
 -- Remove the <# at the start and the > at the end, so you are left with only a long number.
-DiscordRelay.DiscordGuildID = "124237184550043654"
-DiscordRelay.DiscordChannelID = "500897096514142225"
+DiscordRelay.DiscordGuildID = "518287632988635136"
+DiscordRelay.DiscordChannelID = "531658127221850112"
 
 /*----------------------------------------
 Non Critical Config Options Below

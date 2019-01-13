@@ -573,8 +573,10 @@ local function overridefancyLogAdmin()
 		local args = { ... }
 		local message = ""
 		local no_targets = false
-		local hide_echo = false
-		
+		local hide_echo = false		
+
+		if isstring(args[1]) and string.StartWith( args[1], "#P to #P" ) then return end
+
 		if type( format ) == "boolean" then
 			hide_echo = format
 			format = args[ 1 ]
@@ -612,7 +614,7 @@ local function overridefancyLogAdmin()
 				message = message .. "\"" .. arg .. "\""
 			end
 			
-			if specifier == "T" then				
+			if specifier == "T" or specifier == "P"  then				
 				if type( arg ) == "table" then
 				if #arg == 0 then no_targets = true end
 					for j,k in pairs(arg) do 
@@ -632,7 +634,9 @@ local function overridefancyLogAdmin()
 		if no_targets then -- We don't want to log if there's nothing being targetted
 			return
 		end
-		
+
+		if hide_echo then return end
+
 		local date = os.date( "*t" )
 		DiscordRelay.SendToDiscordRaw(nil, nil,  string.format( "[%02i:%02i:%02i] ", date.hour, date.min, date.sec ) .. message )
 	end
