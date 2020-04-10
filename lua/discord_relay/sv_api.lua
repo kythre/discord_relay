@@ -1,4 +1,3 @@
-
 function DiscordRelay.GetGuild()
 	if not DiscordRelay.BotToken or DiscordRelay.BotToken == "" then
 		Error("Invalid Bot Token!")
@@ -15,13 +14,14 @@ function DiscordRelay.GetGuild()
 		success = function(code, body, headers)
 			DiscordRelay.Guild = util.JSONToTable(body)
 		end,
-		url = "http://discordapp.com/api/guilds/" .. DiscordRelay.DiscordGuildID,
+		url = "https://discordapp.com/api/guilds/" .. DiscordRelay.DiscordGuildID,
 		method = "GET",
 		headers = {
-			Authorization = "Bot " .. DiscordRelay.BotToken
+			["User-Agent"] = "myBotThing (https://some.url, v0.1)",
+			["Authorization"] = "Bot " .. DiscordRelay.BotToken
 		}
 	}
-
+	
 	HTTP(t_struct)
 end
 function DiscordRelay.GetMembers()
@@ -40,10 +40,11 @@ function DiscordRelay.GetMembers()
 		success = function(code, body, headers)
 			DiscordRelay.Members = util.JSONToTable(body)
 		end,
-		url = "http://discordapp.com/api/guilds/" .. DiscordRelay.DiscordGuildID .. "/members?limit=1000",
+		url = "https://discordapp.com/api/guilds/" .. DiscordRelay.DiscordGuildID .. "/members?limit=1000",
 		method = "GET",
 		headers = {
-			Authorization = "Bot " .. DiscordRelay.BotToken
+			["User-Agent"] = "myBotThing (https://some.url, v0.1)",
+			["Authorization"] = "Bot " .. DiscordRelay.BotToken
 		}
 	}
 
@@ -100,4 +101,3 @@ function DiscordRelay.GetMemberNick(member)
 	end)
 	return username
 end
-

@@ -65,6 +65,8 @@ local errcodes = {
 
 function DiscordRelay.VerifyMessageSuccess(code, body, headers)
 	body = util.JSONToTable(body)
+	
+	PrintTable(headers)
 
 	if body then
 		if body.code then
@@ -118,6 +120,7 @@ function DiscordRelay.SendToDiscordRaw(username, avatar, message)
 		parameters = t_post,
 		body = body,
 		headers = {
+			["User-Agent"] = "myBotThing (https://some.url, v0.1)",
 			["Content-Type"] = "application/json",
 			["Content-Length"] = body:len() or "0",
 		},
@@ -257,10 +260,11 @@ function DiscordRelay.GetMessages()
 			MsgC(Color(255, 0, 0), "HTTP error: " .. err .. "\n")
 		end,
 		success = DiscordRelay.HandleChat,
-		url = "http://discordapp.com/api/channels/" .. DiscordRelay.DiscordChannelID .. "/messages",
+		url = "https://discordapp.com/api/channels/" .. DiscordRelay.DiscordChannelID .. "/messages",
 		method = "GET",
 		headers = {
-			Authorization = "Bot " .. DiscordRelay.BotToken
+			["User-Agent"] = "myBotThing (https://some.url, v0.1)",
+			["Authorization"] = "Bot " .. DiscordRelay.BotToken
 		}
 	}
 
@@ -290,7 +294,7 @@ hook.Add("PlayerDeath", "Discord_Player_Death", function(victim, inflictor, atta
 	
 	if attacker:IsPlayer() then
 		messagedaddy = attacker
-		
+		 
 		if (victim == attacker) then
 			deathmessage = deathmessage .. "committed **suicide**"
 		else
@@ -322,7 +326,7 @@ hook.Add("PlayerDeath", "Discord_Player_Death", function(victim, inflictor, atta
 	local sid = ply.SteamID and ply:SteamID()
 	local sid64 = ply.SteamID64 and ply:SteamID64()
 	
-	http.Fetch("http://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
+	http.Fetch("https://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
 		local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>")
 		local msg = {
 			{
@@ -384,7 +388,6 @@ hook.Add( "LagDetectorDetected", "Discord_agDetectorDetected", function()
 
         DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 end)
-
 hook.Add( "LagDetectorQuiet", "Discord_LagDetectorQuiet", function()
         local msg = {
                 {
@@ -401,7 +404,6 @@ hook.Add( "LagDetectorQuiet", "Discord_LagDetectorQuiet", function()
 
         DiscordRelay.SendToDiscordRaw(nil, nil, msg)
 end)
-
 hook.Add( "LagDetectorMeltdown", "MyLagDetectorMeltdown", function()
         local msg = {
                 {
@@ -441,36 +443,36 @@ hook.Add("PlayerSay", "Discord_Webhook_Chat", function(ply, text, teamchat)
 		DiscordRelay.GetMembers()
 	end
 
-	http.Fetch("http://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
+	http.Fetch("https://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
 		local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>")
 		DiscordRelay.SendToDiscordRaw(nick, avatar, text)
 	end)
 end)
 
 hook.Add("PlayerInitialSpawn", "Discord_PlayerInitilaSpawn", function (ply) 
-	local nick = ply.name
-        local sid = ply.networkid
-        local sid64 = util.SteamIDTo64(ply.networkid)
+	local nick = ply:GetName()
+	local sid = ply:SteamID()
+	local sid64 = ply:SteamID64()
+	
+	http.Fetch("https://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
+		local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>")
+		local msg = {
+				{
+					author = {
+							name = nick .. " is has spanwd in the server!",
+							url = "https://steamcommunity.com/profiles/" .. sid64,
+							icon_url = avatar
+					},
+					footer = {
+							text = sid .. " / " .. sid64,
+					},
+					color = DiscordRelay.HexColors.Green
+				}
+		}
+		--msg[1].description = msg[1].description .. "\n\n[:door: Join]("..DiscordRelay.ServerJoinURL$
 
-        http.Fetch("http://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
-                local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>")
-                local msg = {
-                        {
-                                author = {
-                                        name = nick .. " is has spanwd in the server!",
-                                        url = "https://steamcommunity.com/profiles/" .. sid64,
-                                        icon_url = avatar
-                                },
-                                footer = {
-                                        text = sid .. " / " .. sid64,
-                                },
-                                color = DiscordRelay.HexColors.Green
-                        }
-                }
-                --msg[1].description = msg[1].description .. "\n\n[:door: Join]("..DiscordRelay.ServerJoinURL$
-
-                DiscordRelay.SendToDiscordRaw(nil, nil, msg)
-        end)
+		DiscordRelay.SendToDiscordRaw(nil, nil, msg)
+	end)
 end )
 
 gameevent.Listen("player_connect")
@@ -479,7 +481,7 @@ hook.Add("player_connect", "Discord_Player_Connect", function(ply)
 	local sid = ply.networkid
 	local sid64 = util.SteamIDTo64(ply.networkid)
 
-	http.Fetch("http://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
+	http.Fetch("https://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
 		local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>")
 		local msg = {
 			{
@@ -507,7 +509,7 @@ hook.Add("player_disconnect", "Discord_Player_Disconnect", function(data)
 	local sid = ply.SteamID and ply:SteamID() or data.networkid
 	local sid64 = ply.SteamID64 and ply:SteamID64() or util.SteamIDTo64(data.networkid)
 
-	http.Fetch("http://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
+	http.Fetch("https://steamcommunity.com/profiles/" .. sid64 .. "?xml=1", function(content, size)
 		local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>")
 		local msg = {
 			{
@@ -547,7 +549,6 @@ hook.Add("HTTPLoaded", "Discord_Announce_Active", function()
 	hook.Remove("HTTPLoaded", "Discord_Announce_Active") -- Just in case
 end)
 
-
 --[[
 local function overrideulxlogstring()
 	oldlogstring = oldlogstring or ulx.logString
@@ -561,7 +562,6 @@ end
 if ulx then overrideulxlogstring() end
 hook.Add("InitPostEntity", "OverrideULXlogsting", overrideulxlogstring)
 ]]
-
 
 local function overridefancyLogAdmin()
 	oldfancyLogAdmin = oldfancyLogAdmin or ulx.fancyLogAdmin

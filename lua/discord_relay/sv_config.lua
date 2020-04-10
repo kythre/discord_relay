@@ -41,15 +41,15 @@ DiscordRelay.BotToken = token
 
 -- Set this to your Channel ID. You can get this number in Discord by typing \#channelnamehere into chat.
 -- Remove the <# at the start and the > at the end, so you are left with only a long number.
-DiscordRelay.DiscordGuildID = "518287632988635136"
-DiscordRelay.DiscordChannelID = "531658127221850112"
+DiscordRelay.DiscordGuildID = "639346355625787412"
+DiscordRelay.DiscordChannelID = "697991539862929498"
 
 /*----------------------------------------
 Non Critical Config Options Below
 ------------------------------------------*/
 
 -- Set this to the delay between fetching messages. Increase this if you are getting rate limited. Don't put this below 2.
-DiscordRelay.MessageDelay = 2
+DiscordRelay.MessageDelay = 10
 
 -- Set this to the max amount of messages to retrieve
 DiscordRelay.MaxMessages = 10
@@ -60,4 +60,4 @@ DiscordRelay.AvoidUsingBots = false
 
 -- DEBUG MODE! Do not enable this unless you've been told to. It can get spammy in the console if you enable this.
 -- As it stands, this only serves the purpose of identifying problems not identified by discord's json responses.
-DiscordRelay.DEBUG_MODE = false
+DiscordRelay.DEBUG_MODE = true
